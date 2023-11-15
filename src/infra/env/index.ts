@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 const envSchema = z.object({
   USERS_TABLE: z.string().default('users'),
-  COUNTER_API_URL: z.string(),
-  COUNTER_API_KEY: z.string(),
+  COUNTER_API_URL: z.string().default('http://localhost:1111'),
+  COUNTER_API_KEY: z.string().default('api-key'),
 })
 
 const _env = envSchema.safeParse(process.env)
