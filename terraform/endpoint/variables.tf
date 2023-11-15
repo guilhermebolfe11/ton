@@ -10,7 +10,7 @@ variable "function_name" {
 
 variable "api_id" {
   description = "Identifier of api"
-  type = string
+  type        = string
 }
 
 variable "project_name" {
@@ -20,16 +20,21 @@ variable "project_name" {
 
 variable "api_arn" {
   description = "Arn of api"
-  type = string
+  type        = string
 }
 
 variable "output_path" {
   description = "Output path to file empty"
-  type = string
+  type        = string
 }
 
 variable "role_arn" {
   description = "Role arn"
-  type = string
+  type        = string
+}
+
+variable "env_vars" {
+  description = "Environment variables"
+  type        = map(string)
 }
 

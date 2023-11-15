@@ -7,40 +7,31 @@ on:
 concurrency:
   group: ${{github.event.repository.name}}
 
+env:
+  workspace: ${{vars.WORKSPACE}}
+  TF_VAR_project_name: ${{vars.PROJECT_NAME}}
+  TF_VAR_aws_region: ${{vars.AWS_REGION}}
+  TF_VAR_api_domain: ${{vars.API_DOMAIN}}
+  TF_VAR_bucket_states: ${{vars.BUCKET_STATES}}
+  AWS_REGION: ${{vars.AWS_REGION}}
+  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
 jobs:
   Infra:
-    name: Infra
+    name: Deploy Infra
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
-    env:
-      workspace: ${{vars.WORKSPACE}}
-      TF_VAR_project_name: ${{vars.PROJECT_NAME}}
-      TF_VAR_aws_region: ${{vars.AWS_REGION}}
-      TF_VAR_api_domain: ${{vars.API_DOMAIN}}
-      TF_VAR_bucket_states: ${{vars.BUCKET_STATES}}
-
     steps:
       - name: Checkout files
         uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{vars.AWS_REGION}}
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
       - name: Terraform setup
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
         working-directory: terraform
-        run: terraform init
-
-      - name: Terraform workspace
-        working-directory: .terraform
-        run: (terraform workspace new ${{env.workspace}} || true) && terraform workspace select ${{env.workspace}}
+        run: terraform init -backend-config=config.s3.tfbackend
 
       - name: Terraform validate
         working-directory: terraform
@@ -49,3 +40,55 @@ jobs:
       - name: Terraform apply
         working-directory: terraform
         run: terraform apply -auto-approve
+
+  MapFunc:
+    name: Map lambdas functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: Infra
+    outputs:
+      lambdas: ${{ steps.getLambdas.outputs.lambdas }}
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Get lambdas
+        id: getLambdas
+        run: |
+          cd src/infra/handlers
+          lambdas=$(tree -d -L 1 -J | jq -j -c '.[0].contents | map(.name)')
+          echo "lambdas=${lambdas}" >> $GITHUB_OUTPUT
+
+  Code:
+    name: Deploy Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: MapFunc
+    strategy:
+      matrix:
+        lambda: ${{ fromJSON(needs.MapFunc.outputs.lambdas) }}
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build ${{matrix.lambda}}
+        run: pnpm esbuild src/infra/handlers/${{matrix.lambda}}/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=build/${{matrix.lambda}}/index.js
+
+      - name: Zip build ${{matrix.lambda}}
+        run: cd build/${{matrix.lambda}} && zip -r index.zip index.js*
+
+      - name: Deploy code ${{matrix.lambda}}
+        run: aws lambda update-function-code --function-name=${{matrix.lambda}} --zip-file=fileb://build/${{matrix.lambda}}/index.zip

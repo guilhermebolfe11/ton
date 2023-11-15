@@ -6,6 +6,9 @@ resource "aws_lambda_function" "this" {
   memory_size   = 256
   timeout       = 27
   role          = var.role_arn
+  environment {
+    variables = var.env_vars
+  }
   lifecycle {
     ignore_changes = [
       filename
