@@ -5,6 +5,7 @@ import {
   makeCreateUserUseCaseRequest,
   makeGetUserUseCaseRequest,
 } from '@test/factories'
+
 let sut: GetUserUseCase
 
 describe('Get User Use Case', () => {

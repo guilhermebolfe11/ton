@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { makeTestCreateUserUseCase } from './factories'
 import { CreateUserUseCase } from './create-user'
 import { makeCreateUserUseCaseRequest } from '@test/factories'
+
 let sut: CreateUserUseCase
 
 describe('Create User Use Case', () => {
