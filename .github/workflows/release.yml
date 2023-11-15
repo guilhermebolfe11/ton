@@ -33,10 +33,6 @@ jobs:
         working-directory: terraform
         run: terraform init -backend-config=config.s3.tfbackend
 
-      - name: Terraform workspace
-        working-directory: .terraform
-        run: (terraform workspace new ${{env.workspace}} || true) && terraform workspace select ${{env.workspace}}
-
       - name: Terraform validate
         working-directory: terraform
         run: terraform validate
