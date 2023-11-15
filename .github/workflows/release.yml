@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [feat/ton-api]
+    branches: [master]
 
 concurrency:
   group: ${{github.event.repository.name}}
@@ -19,10 +19,9 @@ env:
 
 jobs:
   Infra:
-    name: Infra
+    name: Deploy Infra
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout files
         uses: actions/checkout@v3
@@ -45,3 +44,52 @@ jobs:
       - name: Terraform apply
         working-directory: terraform
         run: terraform apply -auto-approve
+
+  MapFunc:
+    name: Map lambdas functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: Infra
+    outputs:
+      lambdas: ${{ steps.getLambdas.outputs.lambdas }}
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+      - name: Get lambdas
+        id: getLambdas
+        run: |
+          cd src
+          lambdas=$(tree -d -L 1 -J | jq -j -c '.[0].contents | map(.name)')
+          echo ::set-output name=lambdas::${lambdas}
+
+  Code:
+    name: Deploy Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: MapFunc
+    strategy:
+      matrix:
+        lambda: ${{ fromJSON(needs.MapFunc.outputs.lambdas) }}
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build ${{matrix.lambda}}
+        run: pnpm build-${{matrix.lambda}}
+
+      - name: Deploy code ${{matrix.lambda}}
+        run: aws lambda update-function-code --function-name=${{matrix.lambda}} --zip-file=fileb://build/${{matrix.lambda}}/index.zip
