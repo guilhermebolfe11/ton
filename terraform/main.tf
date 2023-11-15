@@ -1,5 +1,5 @@
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
   default_tags {
     tags = {
       project_name = var.project_name
@@ -8,12 +8,7 @@ provider "aws" {
 }
 
 terraform {
-  backend "s3" {
-    bucket               = var.bucket_states
-    key                  = "terraform.tfstate"
-    region               = var.aws_region
-    dynamodb_table       = "terraforms-locks"
-    workspace_key_prefix = "workspace"
+  backend "local" {
   }
   required_providers {
     aws = {
@@ -37,4 +32,7 @@ module "endpoint" {
   project_name  = var.project_name
   output_path   = module.shared.output_path
   role_arn      = module.shared.role_arn
+  env_vars = {
+    USERS_TABLE = aws_dynamodb_table.users.name
+  }
 }

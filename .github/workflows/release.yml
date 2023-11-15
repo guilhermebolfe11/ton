@@ -58,7 +58,7 @@ jobs:
       - name: Get lambdas
         id: getLambdas
         run: |
-          cd src
+          cd src/infra/handlers
           lambdas=$(tree -d -L 1 -J | jq -j -c '.[0].contents | map(.name)')
           echo ::set-output name=lambdas::${lambdas}
 

@@ -22,5 +22,5 @@ variable "lambdas" {
 
 variable "bucket_states" {
   description = "Bucket to storage .tfstate"
-  type = string
+  type        = string
 }
