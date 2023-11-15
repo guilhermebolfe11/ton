@@ -1,0 +1,19 @@
+# Dependency directories
+node_modules/
+
+# dotenv environment variable files
+.env
+
+#Build
+build
+*.zip
+
+#Pnpm
+.pnp.*
+
+#Terraform
+.terraform
+*.tfstate
+*.backup
+*.hcl
+
