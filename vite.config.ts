@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     exclude: ['**/node_modules/**', '**/build/**', '**/coverage/**'],
     coverage: {
-      reporter: ['json-summary'],
+      reporter: ['json', 'json-summary'],
     },
   },
 })
