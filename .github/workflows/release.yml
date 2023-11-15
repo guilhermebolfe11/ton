@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [master]
+    branches: [feat/ton-api]
 
 concurrency:
   group: ${{github.event.repository.name}}
@@ -31,7 +31,7 @@ jobs:
 
       - name: Terraform init
         working-directory: terraform
-        run: terraform init
+        run: terraform init -backend-config=config.s3.tfbackend
 
       - name: Terraform workspace
         working-directory: .terraform
@@ -89,7 +89,10 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Build ${{matrix.lambda}}
-        run: pnpm build-${{matrix.lambda}}
+        run: pnpm esbuild src/infra/handlers/${{matrix.lambda}}/index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=build/${{matrix.lambda}}/index.js
+
+      - name: Zip build ${{matrix.lambda}}
+        run: cd build/${{matrix.lambda}} && zip -r index.zip index.js*
 
       - name: Deploy code ${{matrix.lambda}}
         run: aws lambda update-function-code --function-name=${{matrix.lambda}} --zip-file=fileb://build/${{matrix.lambda}}/index.zip

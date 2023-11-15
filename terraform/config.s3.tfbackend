@@ -1,0 +1,5 @@
+bucket         = "terraforms-states-personal"
+key            = "app/terraform.tfstate"
+region         = "us-east-2"
+dynamodb_table = "terraforms-locks"
+workspace_key_prefix = "workspace"
