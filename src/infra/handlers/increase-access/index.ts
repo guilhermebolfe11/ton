@@ -1,9 +1,9 @@
+import { makeIncreaseAccessUseCase } from '@/domain/use-cases/factories'
 import {
   Handler,
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from 'aws-lambda'
-import axios from 'axios'
 
 type ProxyHandler = Handler<APIGatewayProxyEventV2, any>
 
@@ -12,19 +12,27 @@ export const handler: ProxyHandler = async (
   context,
 ): Promise<APIGatewayProxyResultV2> => {
   try {
-    const countApi = axios.create({
-      baseURL: 'https://api.countapi.xyz',
-    })
+    const useCase = makeIncreaseAccessUseCase()
+    const response = await useCase.execute()
+    if (response.isLeft()) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: 'Bad request',
+          issues: [response.value.message],
+        }),
+      }
+    }
 
     return {
       statusCode: 200,
-      body: `Increase access`,
+      body: JSON.stringify(response.value),
     }
   } catch (e) {
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Internal Server Error',
+        message: 'Internal server error',
         issues: [e.message],
       }),
     }
