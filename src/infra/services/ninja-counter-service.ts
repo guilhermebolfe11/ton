@@ -31,9 +31,7 @@ export class NinjaCounterService implements CounterService {
 
   async get(id: string): Promise<number> {
     try {
-      const response = await this.api.get<NinjaCounter>(
-        `/v1/counter?id=${id}&hit=false`,
-      )
+      const response = await this.api.get<NinjaCounter>(`/v1/counter?id=${id}`)
       return response.data.value
     } catch (e) {
       return 0
