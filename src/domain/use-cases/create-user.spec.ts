@@ -10,8 +10,22 @@ describe('Create User Use Case', () => {
   })
 
   it('should be able to create user', async () => {
-    const userRequest = makeCreateUserUseCaseRequest()
-    const resultUser = await sut.execute(userRequest)
-    expect(resultUser.isRight()).toBe(true)
+    const createUserRequest = makeCreateUserUseCaseRequest()
+    const getResultUser = await sut.execute(createUserRequest)
+    expect(getResultUser.isRight()).toBe(true)
+  })
+
+  it('should not be able to create user with different passwords', async () => {
+    const createUserRequest = makeCreateUserUseCaseRequest({ password: '123' })
+    const getResultUser = await sut.execute(createUserRequest)
+    expect(getResultUser.isLeft()).toBe(true)
+  })
+
+  it('should not be able to create user with invalid email', async () => {
+    const createUserRequest = makeCreateUserUseCaseRequest({
+      email: 'invalid.com',
+    })
+    const getResultUser = await sut.execute(createUserRequest)
+    expect(getResultUser.isLeft()).toBe(true)
   })
 })

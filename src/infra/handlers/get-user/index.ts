@@ -4,6 +4,7 @@ import {
   APIGatewayProxyResultV2,
 } from 'aws-lambda'
 import { makeGetUserUseCase } from '@domain/use-cases/factories'
+import { UserDTO } from '@/infra/dtos'
 type ProxyHandler = Handler<APIGatewayProxyEventV2, any>
 
 export const handler: ProxyHandler = async (
@@ -24,9 +25,13 @@ export const handler: ProxyHandler = async (
       }
     }
 
+    const user = response.value.user
+      ? new UserDTO(response.value.user)
+      : undefined
+
     return {
       statusCode: 200,
-      body: JSON.stringify(response.value.user),
+      body: JSON.stringify(user),
     }
   } catch (e) {
     return {
