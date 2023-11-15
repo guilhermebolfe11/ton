@@ -47,8 +47,8 @@ jobs:
         run: |
           endpoint=$(terraform output -raw endpoint)
           docs=$(terraform output -raw docs)
-          echo "endpoint=$endpoint" >> $GITHUB_OUTPUT
-          echo "docs=$docs" >> $GITHUB_OUTPUT
+          echo "endpoint='$endpoint'" >> $GITHUB_OUTPUT
+          echo "docs='$docs'" >> $GITHUB_OUTPUT
 
       - name: Set release summary
         uses: x-color/github-actions-job-summary@v0.1.0
