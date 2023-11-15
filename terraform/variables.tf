@@ -24,3 +24,13 @@ variable "bucket_states" {
   description = "Bucket to storage .tfstate"
   type        = string
 }
+
+variable "counter_api_url" {
+  description = "Base url from counter api"
+  type        = string
+}
+
+variable "counter_api_key" {
+  description = "Key from api"
+  type        = string
+}

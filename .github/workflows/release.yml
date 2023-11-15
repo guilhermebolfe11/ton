@@ -13,6 +13,8 @@ env:
   TF_VAR_aws_region: ${{vars.AWS_REGION}}
   TF_VAR_api_domain: ${{vars.API_DOMAIN}}
   TF_VAR_bucket_states: ${{vars.BUCKET_STATES}}
+  TF_VAR_counter_api_key: ${{secrets.COUNTER_API_KEY}}
+  TF_VAR_counter_api_url: ${{vars.COUNTER_API_URL}}
   AWS_REGION: ${{vars.AWS_REGION}}
   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
@@ -113,11 +115,13 @@ jobs:
           lambdas=$(tree -d -L 1 -J | jq -j -c '.[0].contents | map(.name)')
           echo "lambdas=${lambdas}" >> $GITHUB_OUTPUT
 
-  Code:
-    name: Deploy code
+  Build:
+    name: Build code
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: MapFunc
+    outputs:
+      lambdas: ${{ needs.MapFunc.outputs.lambdas }}
     strategy:
       matrix:
         lambda: ${{ fromJSON(needs.MapFunc.outputs.lambdas) }}
@@ -144,6 +148,45 @@ jobs:
 
       - name: Zip build ${{matrix.lambda}}
         run: cd build/${{matrix.lambda}} && zip -r index.zip index.js*
+
+      - name: Create artifact ${{matrix.lambda}}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.lambda}}
+          path: ./build/${{matrix.lambda}
+          retention-days: 1
+
+  DeployCode:
+    name: Deploy code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: Build
+    strategy:
+      matrix:
+        lambda: ${{ fromJSON(needs.Build.outputs.lambdas) }}
+    steps:
+      - name: Checkout files
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{matrix.lambda}}
+          path: ./build/${{matrix.lambda}
 
       - name: Deploy code ${{matrix.lambda}}
         run: aws lambda update-function-code --function-name=${{matrix.lambda}} --zip-file=fileb://build/${{matrix.lambda}}/index.zip
