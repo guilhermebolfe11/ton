@@ -44,6 +44,7 @@ export class DynamoCounterService implements CounterService {
           },
         },
         UpdateExpression: 'ADD #value :change',
+        ReturnValues: 'UPDATED_NEW',
       })
       const responseUpdateItem = await this.client.send(updateItemCommand)
       current = parseInt(responseUpdateItem.Attributes?.value.N ?? '0')
