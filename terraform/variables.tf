@@ -3,11 +3,6 @@ variable "aws_region" {
   type        = string
 }
 
-variable "api_domain" {
-  description = "Domain under which the API should be deployed."
-  type        = string
-}
-
 variable "project_name" {
   description = "Name of project."
   type        = string
