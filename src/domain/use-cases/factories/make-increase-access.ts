@@ -1,9 +1,9 @@
-import { NinjaCounterService } from '@/infra/services'
+import { DynamoCounterService } from '@/infra/services'
 import { IncreaseAccessUseCase } from '../increase-access'
 import { InMemoryCounterService } from '@test/services'
 
 export function makeIncreaseAccessUseCase() {
-  const counterService = new NinjaCounterService()
+  const counterService = new DynamoCounterService()
   const useCase = new IncreaseAccessUseCase(counterService)
   return useCase
 }

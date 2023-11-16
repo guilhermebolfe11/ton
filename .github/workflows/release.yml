@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [master]
+    branches: [feat/ton-api]
 
 concurrency:
   group: ${{github.event.repository.name}}
