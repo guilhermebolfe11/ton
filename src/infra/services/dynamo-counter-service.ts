@@ -36,7 +36,7 @@ export class DynamoCounterService implements CounterService {
           id: { S: id },
         },
         ExpressionAttributeNames: {
-          '#value': 'Value',
+          '#value': 'value',
         },
         ExpressionAttributeValues: {
           ':change': {
