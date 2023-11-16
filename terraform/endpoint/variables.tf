@@ -38,3 +38,13 @@ variable "env_vars" {
   type        = map(string)
 }
 
+variable "authorizer_id" {
+  description = "Identifier of authorizer"
+  type        = string
+}
+
+variable "with_auth" {
+  description = "Flag to add auth in lambda"
+  type        = bool
+}
+

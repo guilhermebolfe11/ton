@@ -10,6 +10,17 @@ resource "aws_apigatewayv2_stage" "api" {
   auto_deploy = true
 }
 
+resource "aws_apigatewayv2_authorizer" "api" {
+  api_id                            = aws_apigatewayv2_api.api.id
+  authorizer_type                   = "REQUEST"
+  authorizer_uri                    = aws_lambda_function.auth.invoke_arn
+  identity_sources                  = ["$request.header.Authorization"]
+  name                              = "Header Authorization"
+  authorizer_payload_format_version = "2.0"
+  enable_simple_responses           = true
+  authorizer_result_ttl_in_seconds  = 300
+}
+
 data "aws_apigatewayv2_export" "api" {
   api_id        = aws_apigatewayv2_api.api.id
   specification = "OAS30"
