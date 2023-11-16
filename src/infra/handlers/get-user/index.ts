@@ -5,7 +5,7 @@ import {
 } from 'aws-lambda'
 import { makeGetUserUseCase } from '@domain/use-cases/factories'
 import { UserDTO } from '@/infra/dtos'
-type ProxyHandler = Handler<APIGatewayProxyEventV2, any>
+type ProxyHandler = Handler<APIGatewayProxyEventV2, APIGatewayProxyResultV2>
 
 export const handler: ProxyHandler = async (
   event: APIGatewayProxyEventV2,

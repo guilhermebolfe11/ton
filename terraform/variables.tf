@@ -8,10 +8,11 @@ variable "project_name" {
   type        = string
 }
 
-variable "lambdas" {
-  description = "Project lambdas. Ex: {'POST /example':{'function_name':'example'}}."
+variable "endpoints" {
+  description = "Endpoints of Api. Ex: {'POST /example':{'function_name':'example', 'with_auth': false}}."
   type = map(object({
     function_name = string
+    with_auth = bool
   }))
 }
 
