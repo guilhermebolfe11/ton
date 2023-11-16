@@ -34,6 +34,7 @@ module "endpoint" {
   role_arn      = module.shared.role_arn
   env_vars = {
     USERS_TABLE = aws_dynamodb_table.users.name
+    COUNTER_TABLE = aws_dynamodb_table.counters.name
     COUNTER_API_KEY = var.counter_api_key
     COUNTER_API_URL = var.counter_api_url
   }

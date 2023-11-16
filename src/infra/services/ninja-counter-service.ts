@@ -25,6 +25,7 @@ export class NinjaCounterService implements CounterService {
       )
       return response.data.value
     } catch (e) {
+      console.error(`Error Ninja Service: ${e.message}`)
       return 0
     }
   }
@@ -34,6 +35,7 @@ export class NinjaCounterService implements CounterService {
       const response = await this.api.get<NinjaCounter>(`/v1/counter?id=${id}`)
       return response.data.value
     } catch (e) {
+      console.error(`Error Ninja Service: ${e.message}`)
       return 0
     }
   }
