@@ -10,6 +10,7 @@ GA{{Lambda get-access}}
 IA{{Lambda increase-access}}
 DB[(Dynamo users)]
 NJ[/Ninja counter\]
+DC[/Dynamo counter\]
 
 C --> AP
 AP --> GU
@@ -18,6 +19,8 @@ AP --> GA
 AP --> IA
 GU --> DB
 CU --> DB
-GA --> NJ
-IA --> NJ
+GA -.-> NJ
+IA -.-> NJ
+GA -.-> DC
+IA -.-> DC
 ```
