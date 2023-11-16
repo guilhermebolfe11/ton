@@ -11,7 +11,6 @@ env:
   workspace: ${{vars.WORKSPACE}}
   TF_VAR_project_name: ${{vars.PROJECT_NAME}}
   TF_VAR_aws_region: ${{vars.AWS_REGION}}
-  TF_VAR_api_domain: ${{vars.API_DOMAIN}}
   TF_VAR_bucket_states: ${{vars.BUCKET_STATES}}
   TF_VAR_counter_api_key: ${{secrets.COUNTER_API_KEY}}
   TF_VAR_counter_api_url: ${{vars.COUNTER_API_URL}}
