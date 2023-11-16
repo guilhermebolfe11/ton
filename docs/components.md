@@ -21,6 +21,6 @@ GU --> DB
 CU --> DB
 GA -.-> NJ
 IA -.-> NJ
-GA -.-> DC
-IA -.-> DC
+GA --> DC
+IA --> DC
 ```
